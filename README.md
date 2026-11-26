@@ -8,7 +8,7 @@ Tres implementaciones de la **subsecuencia común más larga** (*Longest Common 
 | **B** – `lcs_hirschberg.py` | Divide y vencerás de Hirschberg | O(m·n) | O(n) |
 | **C** – `lcs_dp.py` | Programación dinámica tabular | O(m·n) | O(m·n) |
 
-> Asignatura: Diseño avanzado de algoritmos · Autor: **[Nombre y apellidos]**
+> Asignatura: Diseño avanzado de algoritmos · Autor: **César Otero Fernández**
 
 ## Requisitos
 
@@ -19,7 +19,7 @@ Tres implementaciones de la **subsecuencia común más larga** (*Longest Common 
 ## Ejecución con un único comando
 
 ```bash
-git clone https://github.com/TU_USUARIO/lcs-actividad1.git
+git clone https://github.com/Coterof/lcs-actividad1
 cd lcs-actividad1
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
