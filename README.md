@@ -104,6 +104,7 @@ Las tres hacen exactamente lo mismo (tests → experimentos → gráficas):
 Opciones útiles:
 - **Solo tests:** `python -m pytest tests -q` (o `make test`). Deben pasar 23 pruebas.
 - **Solo una comprobación rápida de los experimentos:** `python src/benchmark.py --rapido`.
+- **Medidas extra de la versión A** (cadenas aleatorias y peor caso con n = 16; las cifras citadas en la memoria): `python src/extra_a.py`. Tarda unos minutos.
 - **Probar una versión suelta**, por ejemplo Hirschberg:
   ```bash
   python -c "import sys; sys.path.insert(0, 'src'); from lcs_hirschberg import hirschberg; print(hirschberg('ABCBDAB', 'BDCABA'))"
@@ -136,10 +137,11 @@ El experimento completo tarda unos minutos, porque la versión A en el peor caso
 lcs-actividad1/
 ├── src/
 │   ├── lcs_recursiva.py    # Versión A: recursiva directa (con contador de llamadas)
-│   ├── lcs_hirschberg.py   # Versión B: Hirschberg (divide y vencerás, DP de dos filas)
+│   ├── lcs_hirschberg.py   # Versión B: Hirschberg (divide y vencerás, DP de dos filas, trabaja con índices)
 │   ├── lcs_dp.py           # Versión C: programación dinámica tabular
 │   ├── generador.py        # Generación reproducible de cadenas (aleatorias y peor caso)
 │   ├── benchmark.py        # Medición de tiempo de CPU y memoria máxima
+│   ├── extra_a.py          # Medidas extra de A (cadenas aleatorias n = 16, 18, 20 y peor caso n = 16)
 │   └── graficas.py         # Gráficas y tabla de resultados
 ├── tests/test_lcs.py       # Pruebas: casos límite, ejemplo del Tema 3 y 200 parejas aleatorias
 ├── data/                   # resultados.csv y gráficas generadas
@@ -159,7 +161,7 @@ lcs-actividad1/
 
 ### Limitaciones
 
-- `tracemalloc` no cuenta la pila de llamadas, por lo que la memoria de la versión A queda infravalorada (teóricamente O(m+n) marcos de pila).
+- `tracemalloc` no cuenta la pila de llamadas, por lo que la memoria de la versión A queda infravalorada (teóricamente O(m+n) marcos de pila). Además cuenta cada entero grande como objeto, por lo que la memoria de B no crece de forma perfectamente regular entre tamaños.
 - Se mide una sola pareja por tamaño y los tiempos varían algo entre ejecuciones según la carga de la máquina; con tamaños pequeños, la diferencia entre B y C puede incluso invertirse por el ruido de medición.
 
 ## Resultados principales
@@ -168,23 +170,23 @@ Medidos en un equipo con Intel Core i5-1135G7, 16 GB de RAM, Omarchy Linux y Pyt
 
 | n | A: tiempo (ms) | A: llamadas | B: tiempo (ms) | B: MB | C: tiempo (ms) | C: MB |
 |---|---|---|---|---|---|---|
-| 6 | 0,169 | 1 847 | 0,024 | 0,001 | 0,015 | 0,0005 |
-| 8 | 2,38 | 25 739 | 0,031 | 0,0012 | 0,026 | 0,0009 |
-| 10 | 35,4 | 369 511 | 0,039 | 0,0016 | 0,023 | 0,0012 |
-| 12 | 489 | 5 408 311 | 0,039 | 0,0018 | 0,025 | 0,0016 |
-| 14 | 7 392 | 80 233 199 | 0,046 | 0,002 | 0,029 | 0,002 |
-| 16 | timeout (> 60 s) | 1 202 160 779 (medición individual: 122 s) | 0,064 | 0,0021 | 0,043 | 0,0026 |
-| 100 | — | — | 1,65 | 0,0065 | 0,964 | 0,0863 |
-| 250 | — | — | 8,86 | 0,0131 | 5,89 | 0,5202 |
-| 500 | — | — | 35,1 | 0,0225 | 26,1 | 2,185 |
-| 1000 | — | — | 154 | 0,0734 | 118 | 12,02 |
-| 2000 | — | — | 602 | 0,1909 | 549 | 56,01 |
+| 6 | 0,167 | 1 847 | 0,027 | 0,0005 | 0,015 | 0,0005 |
+| 8 | 2,35 | 25 739 | 0,028 | 0,0005 | 0,017 | 0,0009 |
+| 10 | 32,7 | 369 511 | 0,036 | 0,0006 | 0,020 | 0,0012 |
+| 12 | 479 | 5 408 311 | 0,041 | 0,0006 | 0,026 | 0,0016 |
+| 14 | 7 140 | 80 233 199 | 0,057 | 0,0006 | 0,031 | 0,002 |
+| 16 | timeout (> 60 s) | 1 202 160 779 (medición individual: 122 s) | 0,082 | 0,0006 | 0,044 | 0,0026 |
+| 100 | — | — | 1,97 | 0,0026 | 1,04 | 0,0863 |
+| 250 | — | — | 11,3 | 0,0062 | 6,25 | 0,5202 |
+| 500 | — | — | 43,8 | 0,0122 | 28,4 | 2,185 |
+| 1000 | — | — | 181 | 0,0587 | 118 | 12,02 |
+| 2000 | — | — | 714 | 0,1479 | 494 | 56,01 |
 
 Conclusiones breves:
 
 - **A** es exponencial: el número de llamadas coincide exactamente con 2·C(2n, n) − 1, y con n = 16 ya tarda más de dos minutos.
 - **C** es la más simple y rápida, pero su memoria crece como n² (56 MB con n = 2000).
-- **B** mantiene el tiempo O(m·n), con una constante algo mayor, y reduce la memoria a O(n) (unas 290 veces menos con n = 2000).
+- **B** mantiene el tiempo O(m·n), con una constante algo mayor, y reduce la memoria a O(n) (unas 380 veces menos con n = 2000).
 
 La memoria completa, con el análisis detallado y las gráficas, está en el PDF de la entrega.
 
